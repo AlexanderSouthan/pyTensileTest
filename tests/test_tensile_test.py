@@ -10,7 +10,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
-from src.pyAnalytics import tensile_test_data
+from src.pyTensileTest import tensile_test_data
 
 
 class TestTensileTest(unittest.TestCase):
