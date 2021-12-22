@@ -5,3 +5,4 @@ pip
 little_helpers
 pyPreprocessing
 pyDataFitting
+openpyxl

@@ -1,8 +1,9 @@
-name: pTensileTest
+name: pyTensileTest
 dependencies:
   - numpy
   - matplotlib
   - pandas
+  - openpyxl
   - pip
   - pip:
     - little_helpers
