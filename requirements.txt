@@ -1,0 +1,7 @@
+numpy
+matplotlib
+pandas
+pip
+little_helpers
+pyPreprocessing
+pyDataFitting

@@ -1,0 +1,10 @@
+name: pTensileTest
+dependencies:
+  - numpy
+  - matplotlib
+  - pandas
+  - pip
+  - pip:
+    - little_helpers
+    - pyPreprocessing
+    - pyDataFitting
