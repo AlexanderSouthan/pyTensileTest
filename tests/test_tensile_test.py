@@ -38,3 +38,7 @@ class TestTensileTest(unittest.TestCase):
         self.assertAlmostEqual(
             tens_test.results.loc[0, tens_test.elongation_at_break_title],
             x.max(), 5)
+
+        tens_test_2 = tensile_test_data.tensile_test(
+            'tests/tensile_test.xlsx', 'import', unit_strain='%',
+            offset_correction=True)
