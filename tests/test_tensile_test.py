@@ -42,3 +42,13 @@ class TestTensileTest(unittest.TestCase):
         tens_test_2 = tensile_test_data.tensile_test(
             'tests/tensile_test.xlsx', 'import', unit_strain='%',
             offset_correction=True)
+        tens_test_2.find_data_borders(
+            onset_mode='stress_thresh', stress_thresh=1,
+            data_end_mode='lower_thresh', lower_thresh=-3)
+        tens_test_2.find_data_borders(
+            onset_mode='deriv_2_max', stress_thresh=1,
+            data_end_mode='perc_drop', lower_thresh=0.05, drop_window=2)
+        tens_test_2.find_data_borders(
+            onset_mode='fit', fit_function='cum_dist_normal_with_rise',
+            fit_boundaries=[[0.01, 5], [0, 12], [0, 12], [0, 5]],
+            data_end_mode='perc_drop', lower_thresh=0.05, drop_window=2)
