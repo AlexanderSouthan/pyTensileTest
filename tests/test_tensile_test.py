@@ -41,7 +41,8 @@ class TestTensileTest(unittest.TestCase):
 
         tens_test_2 = tensile_test_data.tensile_test(
             'tests/tensile_test.xlsx', 'import', unit_strain='%',
-            offset_correction=True)
+            offset_correction=True, start_sheet=0, columns=[0, 1, 2],
+            column_names=['strain', 'stress', 'tool_distance'], header_rows=1)
         tens_test_2.find_data_borders(
             onset_mode='stress_thresh', stress_thresh=1,
             data_end_mode='lower_thresh', lower_thresh=-3)
