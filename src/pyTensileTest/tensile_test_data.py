@@ -437,11 +437,11 @@ class tensile_test():
                         end_idx = sample.index[-1]
                 elif self.data_end_mode == 'perc_drop':
                     diffs = pd.Series(
-                        np.diff(sample['stress']), index=sample.index[:-1]
+                        np.diff(sample['stress']), index=sample.index[1:]
                         ).rolling(self.drop_window).sum()
                     perc_drop = diffs / sample['stress'].max()
 
-                    thresh_violated = data_mask[:-1]*(
+                    thresh_violated = data_mask[1:]*(
                         (np.abs(perc_drop) > self.lower_thresh) &
                         (perc_drop < 0))
 
@@ -459,19 +459,21 @@ class tensile_test():
             self.onsets.append(sample.at[onset_idx, 'strain'])
             self.data_ends.append(sample.at[end_idx, 'strain'])
 
-            # get the tool distance at the onset
-            h_0 = sample.at[onset_idx, 'tool_distance']
-
             # crop dataset according to the identified data borders
             onset_loc = sample.index.get_loc(onset_idx)
             sample.drop(sample.index[:onset_loc], inplace=True)
             end_loc = sample.index.get_loc(end_idx)
             sample.drop(sample.index[end_loc:], inplace=True)
 
-            # recalculate the strain and the derivatives
-            sample['strain'] = ((h_0-sample['tool_distance'])/h_0 *
-                                self.strain_conversion_factor)
-            sample = self.append_derivative(sample, up_to_order=2)
+            if self.onset_mode is not None:
+                # get the tool distance at the onset
+                h_0 = sample.at[onset_idx, 'tool_distance']
+
+                # recalculate the strain and the derivatives
+                sample['strain'] = ((h_0-sample['tool_distance'])/h_0 *
+                                    self.strain_conversion_factor)
+                # sample['strain'] = sample['strain'].abs()
+                sample = self.append_derivative(sample, up_to_order=2)
 
     def calc_e_modulus(self, r_squared_lower_limit=0.995, lower_strain_limit=0,
                        upper_strain_limit=50, smoothing=True, **kwargs):
