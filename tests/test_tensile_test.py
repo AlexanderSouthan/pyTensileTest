@@ -47,28 +47,30 @@ class TestTensileTest(unittest.TestCase):
 
         # test initializing with Excel input
         tens_test_2 = tensile_test_data.tensile_test(
-            'tests/tensile_test.xlsx', 'import', unit_strain='%',
-            offset_correction=True, start_sheet=0, columns=[1, 2, 3],
-            column_names=['strain', 'stress', 'tool_distance'], header_rows=1)
+            'tests/compression test.xls', 'import', unit_strain='%',
+            offset_correction=True, start_sheet=0, columns=[0, 1, 2],
+            column_names=['tool_distance', 'strain', 'stress'], header_rows=1)
 
         # test the different methods for onset and data end detection
         tens_test_2.find_data_borders(
             onset_mode='stress_thresh', stress_thresh=1,
-            data_end_mode='lower_thresh', lower_thresh=-3)
+            data_end_mode='lower_thresh', lower_thresh=-3000)
         tens_test_2.find_data_borders(
             onset_mode='deriv_2_max', stress_thresh=1,
-            data_end_mode='perc_drop', lower_thresh=0.05, drop_window=2)
+            data_end_mode='perc_drop', lower_thresh=0.1, drop_window=2)
         tens_test_2.find_data_borders(
             onset_mode='fit', fit_function=cum_dist_normal_with_rise,
-            fit_boundaries={'sigma': [0.01, 5], 'x_offset': [0, 12],
-                            'slope': [0, 12], 'amp': [0, 5]},
+            fit_boundaries={'sigma': [0.01, 5], 'x_offset': [25, 35],
+                            'slope': [0, 20], 'amp': [0, 500]},
+            non_fit_par={'linear_rise': 'right'},
+            onset_strain_range=[2, 40],
             data_end_mode='perc_drop', lower_thresh=0.05, drop_window=2)
 
         # test with offset_strain window
         tens_test_3 = tensile_test_data.tensile_test(
             'tests/tensile_test.xlsx', 'import', unit_strain='%',
-            onset_mode=None, data_end_mode=None, offset_correction=True,
-            offset_strain=[0, 5], start_sheet=0, columns=[0, 1, 2],
+            offset_correction=True, offset_strain=[0, 5], start_sheet=0,
+            columns=[0, 1, 2],
             column_names=['strain', 'stress', 'tool_distance'], header_rows=1)
 
         # test the perc_drop data end detection
