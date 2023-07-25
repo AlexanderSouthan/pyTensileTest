@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from src.pyTensileTest import tensile_test_data
 
+from little_helpers.math_functions import cum_dist_normal_with_rise
 
 class TestTensileTest(unittest.TestCase):
 
@@ -50,7 +51,7 @@ class TestTensileTest(unittest.TestCase):
             offset_correction=True, start_sheet=0, columns=[1, 2, 3],
             column_names=['strain', 'stress', 'tool_distance'], header_rows=1)
 
-        # test the different methods for onse and data end detection
+        # test the different methods for onset and data end detection
         tens_test_2.find_data_borders(
             onset_mode='stress_thresh', stress_thresh=1,
             data_end_mode='lower_thresh', lower_thresh=-3)
@@ -58,8 +59,9 @@ class TestTensileTest(unittest.TestCase):
             onset_mode='deriv_2_max', stress_thresh=1,
             data_end_mode='perc_drop', lower_thresh=0.05, drop_window=2)
         tens_test_2.find_data_borders(
-            onset_mode='fit', fit_function='cum_dist_normal_with_rise',
-            fit_boundaries=[[0.01, 5], [0, 12], [0, 12], [0, 5]],
+            onset_mode='fit', fit_function=cum_dist_normal_with_rise,
+            fit_boundaries={'sigma': [0.01, 5], 'x_offset': [0, 12],
+                            'slope': [0, 12], 'amp': [0, 5]},
             data_end_mode='perc_drop', lower_thresh=0.05, drop_window=2)
 
         # test with offset_strain window
