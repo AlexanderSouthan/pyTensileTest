@@ -1,6 +1,7 @@
 numpy
 matplotlib
 pandas
+openpyxl
 pip
 little_helpers
 pyPreprocessing

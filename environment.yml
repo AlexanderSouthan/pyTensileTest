@@ -3,6 +3,7 @@ dependencies:
   - numpy
   - matplotlib
   - pandas
+  - openpyxl
   - pip
   - pip:
     - little_helpers
