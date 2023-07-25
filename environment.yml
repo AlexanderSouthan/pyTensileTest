@@ -4,6 +4,7 @@ dependencies:
   - matplotlib
   - pandas
   - openpyxl
+  - xlrd
   - pip
   - pip:
     - little_helpers

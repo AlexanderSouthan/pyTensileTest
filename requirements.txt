@@ -2,6 +2,7 @@ numpy
 matplotlib
 pandas
 openpyxl
+xlrd
 pip
 little_helpers
 pyPreprocessing
