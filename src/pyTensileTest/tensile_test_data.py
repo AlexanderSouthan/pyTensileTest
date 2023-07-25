@@ -13,8 +13,7 @@ import warnings
 from copy import deepcopy
 
 from pyDataFitting.linear_regression import lin_reg_all_sections
-from pyDataFitting.nonlinear_regression import (nonlinear_regression,
-                                                calc_function)
+from pyDataFitting import nonlinear_regression
 from pyPreprocessing.smoothing import smoothing
 from little_helpers.array_tools import closest_index
 from little_helpers.num_derive import derivative
@@ -318,11 +317,19 @@ class tensile_test():
                 fit_function : string
                     The fit function used, must work with imported
                     nonlinear_regression function.
-                fit_boundaries : list of tuples
-                    The boundaries used for the fit. Must be a list of tuples,
-                    each containing an upper and a lower limit for the fit
-                    parameters. The order is given by the corresponding
-                    imported function calc_function.
+                fit_boundaries : dict
+                    The boundaries used for the fit. A dictionary with keys
+                    that are the names of the parameters passed to
+                    fit_function. The values are list with two entries, the
+                    first being the lower limit and the second being the upper
+                    limit of the fit parameters. Not all methods use
+                    boundaries, and they can also be -inf or inf.
+                non_fit_par : dict, optional
+                    A dictionary containing additional parameters used when
+                    calling fit_function that are needed to calculate the
+                    dependent variable values. The given values can be
+                    understood as parameters that are fixed for the fit.
+                    Default is an empty dictionary.
                 fit_scale_factor : float, optional
                     A factor by which the data to be fitted is divided before
                     the fit. A higher value might result in a more stable/
@@ -359,6 +366,7 @@ class tensile_test():
             elif self.onset_mode == 'fit':
                 self.fit_function = kwargs.get('fit_function')
                 self.fit_boundaries = kwargs.get('fit_boundaries')
+                self.non_fit_par = kwargs.get('non_fit_par', {})
                 self.fit_scale_factor = kwargs.get('fit_scale_factor', 1)
                 self.fit_params = []
                 self.onset_fits = []
@@ -399,19 +407,19 @@ class tensile_test():
                     x_for_fit = sample.loc[data_mask,'strain'].values
                     y_for_fit = (sample.loc[data_mask,'deriv_1'].values/
                                  self.fit_scale_factor)
+                    initial_guess = dict((k, 0) for k, v in self.fit_boundaries.items())
                     self.fit_params.append(nonlinear_regression(
-                        x_for_fit, y_for_fit, self.fit_function,
-                        boundaries=self.fit_boundaries, max_iter=1000).x)  # sigma, x_offset, slope, amp
+                        initial_guess, self.fit_boundaries, self.fit_function,
+                        x_for_fit, y_for_fit, non_fit_par=self.non_fit_par).params)  # sigma, x_offset, slope, amp
                     self.onset_fits.append(pd.DataFrame(np.array([
-                        x_for_fit, calc_function(
-                            x_for_fit, self.fit_params[-1], self.fit_function
-                            )*self.fit_scale_factor]).T,
-                        columns=['x_fit', 'y_fit']))
+                        x_for_fit, self.fit_function(
+                            x_for_fit, **self.fit_params[-1], **self.non_fit_par)*
+                        self.fit_scale_factor]).T, columns=['x_fit', 'y_fit']))
 
                     # onset is defined as x_offset + sigma. This only makes sense
                     # when self.fit_function is 'cum_dist_normal_with_rise'. For
                     # other cases, the next calculation must be adapted.
-                    curr_onset = self.fit_params[-1][1] + self.fit_params[-1][0]
+                    curr_onset = self.fit_params[-1]['x_offset'] + self.fit_params[-1]['sigma']
 
                     onset_idx = sample['strain'].index[closest_index(
                         curr_onset, sample['strain'].values)].values[0]
@@ -458,6 +466,10 @@ class tensile_test():
             # store identified data borders in corresponding lists
             self.onsets.append(sample.at[onset_idx, 'strain'])
             self.data_ends.append(sample.at[end_idx, 'strain'])
+            if self.onsets[-1] == self.data_ends[-1]:
+                raise Exception(
+                    'onset is the same value as data_end, therefore all data'
+                    ' is lost!')
 
             # crop dataset according to the identified data borders
             onset_loc = sample.index.get_loc(onset_idx)
